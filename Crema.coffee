@@ -219,10 +219,14 @@ class Crema.EventMachine
 # = Module Class =
 # ================
 class Crema.Module extends Crema.EventMachine
-    constructor: () ->
+    constructor: ( options = {} ) ->
         super()
         @children = []
         @parent = null
+        
+        options.parent?.add( @ )
+        for child in options.children
+            @add( child )
     
 
     add: ( module ) ->

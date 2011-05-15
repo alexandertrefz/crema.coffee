@@ -1,6 +1,6 @@
 ###
- * Crema JavaScript Application Library v0.0.1
- * coming soon: http://alexandertrefz.de/projects/Crema
+ * Crema JavaScript Application Library v0.0.5pre
+ * coming soon: http://alexandertrefz.de/projects/crema
  *
  * Copyright (c) 2011, Alexander Trefz
  *
@@ -23,18 +23,12 @@
  * THE SOFTWARE.
  *
  ###
-
-# =========
-# = Todos =
-# =========
-# - UpdateUI eventbasiert(Asynchron) umsetzen um Performanceprobleme bei großen Applikationen zu vermeiden
-# - 
  
 # ================
 # = Dependencies =
 # ================
-# - jQuery 1.5
-# - underscore
+# - jQuery 1.5+
+# - underscore 1.1+
 
 # ==========================
 # = Core Coding Guidelines =
@@ -102,14 +96,16 @@
 # classes should use PascalCase:
 # MyPrettyNiftyClass
 # 
-# private functions/methods and variables/properties should be prefixed with a single underscore: 
-# _myPrettyNiftyPrivateFunction
+# internal functions/methods and variables/properties should be prefixed with a single underscore: 
+# _myPrettyNiftyInternalFunction
 # 
+# for real private Variables use the Closure around Modules - but attention,
+# this might get depreciated, because private Variables can not be derivated
 
 # ======================
 # = General Guidelines =
 # ======================
-# all "Util"-Methods should be attached to '_' which is created by underscore.coffee
+# all "Util"-Methods should be attached to "_" which is created by underscore.coffee
 # use @property instead of @.property/this.property
 # 
 
@@ -129,7 +125,7 @@ _.ducktype = ( obj, methods ) ->
             
     return true
 
-    
+
 # Shortcuts or often used type Checks
 _.isEventMachine = ( obj ) ->
     return _.ducktype( obj, ["fireEvent", "bindEvent", "unbindEvent"] )
@@ -146,28 +142,24 @@ _.isViewController = ( obj ) ->
 _.isView = ( obj ) ->
     return _.isModule( obj ) and _.ducktype( obj, ["update", "dispose"] )
 
-
-_.isTabItem = ( obj ) ->
-    return _.isViewController( obj ) and _.ducktype( obj, ["name"] )
-
-    
+ 
 # ====================
-# = Initialize Crema =
+# = Initialize crema =
 # ====================
-Crema = {
-    Version: "0.0.1"
-    Views: {}
-    Controllers: {}
-    ViewControllers: {}
+crema = {
+    version: "0.0.5pre"
+    views: {}
+    controllers: {}
+    viewControllers: {}
 }
 
 
 # ======================
 # = EventMachine Class =
 # ======================
-class Crema.EventMachine
-    fireEvent: ( type, data ) ->
-        event = jQuery.Event( type ) unless typeof event is "object"
+class crema.EventMachine
+    fireEvent: ( event, data ) ->
+        event = jQuery.Event( event ) unless typeof event is "object"
         
         jQuery.event.trigger( event, data, @ )
         
@@ -218,46 +210,57 @@ class Crema.EventMachine
 # ================
 # = Module Class =
 # ================
-class Crema.Module extends Crema.EventMachine
+class crema.Module extends crema.EventMachine
     constructor: ( options = {} ) ->
         super()
-        @children = []
+        @children = new crema.Collection()
         @parent = null
         
         options.parent?.add( @ )
-        for child in options.children
-            @add( child )
+        if options.children?
+            for child in options.children 
+                @add( child )
     
 
     add: ( module ) ->
         
         if _.isModule( module )
             unless _.contains( @children, module ) and module.parent?
-                @children.push( module )
+                @children.add( module )
                 module.parent = @
+                module.fireEvent( "gotAdded" )
+                @fireEvent( "add", [ module ] )
         
         return @
     
 
     remove: ( module ) ->
         
-        if _.isNumber( module )
-            @children.splice( module, 1 )
-            
-        else
-            @children = _.without( @children, module )
+        if _.isModule( module ) and module.parent is @controller
+            @children.remove( module )
             module.parent = null
+            module.fireEvent( "gotRemoved" )
+            @fireEvent( "remove", [ module ] )
             
         return @
+    
+        
+    dispose: ->
+        for child in @children
+            child.parent = null
+        
+        @parent?.remove( @ )
+        return null
     
 
 
 # ==============
 # = View-Class =
 # ==============
-class Crema.View extends Crema.Module
-    constructor: () ->
+class crema.View extends crema.Module
+    constructor: ( @controller, options ) ->
         super()
+        
         @ui = {}
         
         @ui.container = $( "<div/>" )
@@ -271,16 +274,26 @@ class Crema.View extends Crema.Module
         if _.isView( view )
             super( view )
             @ui.childContainer.append( view.html )
+            
+        return @
     
-
-    update: () ->
-        for child, i in @children
-            child.update()
+    
+    remove: ( view ) ->
+        if _.isView( view )
+            super( view )
+            view.html.remove()
             
         return @
     
 
-    dispose: () ->
+    update: ->
+        for key, item of @ui
+            item.updateUI?()
+        
+        return @
+    
+
+    dispose: ->
         @html.remove()
     
 
@@ -288,10 +301,48 @@ class Crema.View extends Crema.Module
 # ========================
 # = ViewController Class =
 # ========================
-class Crema.ViewController extends Crema.Module
-    constructor: () ->
+class crema.ViewController extends crema.Module
+    constructor: ( options = {} ) ->
         super()
-        @view = new Crema.View( @ )
+        
+        {
+            @isShown
+        } = options
+        
+        
+        @isShown ?= true
+        
+        @view = new crema.View( @ )
+    
+
+    _initChildren: ( elements ) ->
+        refs = 0
+        for element in elements
+            for item in element.data
+                refs++
+                do(item) =>
+                    
+                    @_callAsync( =>
+                        element.handler( item )
+                        refs--
+                    )
+                    
+                
+            
+        
+        
+        check = setInterval( =>
+            if refs is 0
+                @fireEvent( "childrenInitialized" )
+                clearInterval( check )
+        , 10)
+        
+        
+        return undefined
+    
+
+    _callAsync: ( func ) ->
+        setTimeout( func, 0 )
     
 
     _commandChecker: ( type, bind ) ->
@@ -301,8 +352,8 @@ class Crema.ViewController extends Crema.Module
         else
             actionName = "unbound"
             methodName = "unbind"
-        
-        if type.split( "." )[0] is "command"
+
+        if type.split( "." )[ 0 ] is "command"
             throw new Error( "'command' events cannot be #{actionName} via #{methodName}Event.\nUse #{methodName}Command instead." )
     
 
@@ -324,7 +375,7 @@ class Crema.ViewController extends Crema.Module
             if typeof type is "object"
                 for key, value of type
                     @_commandChecker( key, false )
-                    
+
             else
                 @_commandChecker( type, false )
 
@@ -335,7 +386,7 @@ class Crema.ViewController extends Crema.Module
 
     sendCommand: ( command, data) ->
         @fireEvent( "command.#{command}", data )
-        
+
         return @
     
 
@@ -372,27 +423,113 @@ class Crema.ViewController extends Crema.Module
         @view.add( obj.view )
         return @
     
-    
+
     remove: ( obj ) ->
         super( obj )
         @view.remove( obj.view )
         return @
     
-
-    updateUI: () ->
+    
+    updateUI: ->
         @view.update()
-        #TODO: Decide which child-chain should be called to update, but dont update twice.
-        #for child, i in @children
-        #    child.updateUI()
-        
+        for child, i in @children.items
+            child.updateUI()
+
         return @
     
-
-    dispose: () ->
+    
+    dispose: ->
         super()
         @view.dispose()
+        @fireEvent( "dispose" )
         return null
     
+    
+# ==============
+# = Collection =
+# ==============
+class crema.Collection extends crema.EventMachine
+    constructor: ( array = [] ) ->
+        
+        @count = array.length
+        @items = array
+    
+        
+    indexOf: ( item ) ->
+        @items.indexOf( item )
+        @
+    
+        
+    add: ( item ) ->
+        @items.push( item )
+        @_updateRange()
+        @
+    
+
+    addRange: ( items ) ->
+        for item in items
+            @items.push( item )
+        @_updateRange()
+        @
+    
+
+    insert: ( item, index ) ->
+        @items.splice( index, 0, item )
+        @_updateRange()
+        @
+    
+
+    insertRange: ( items, index ) ->
+        Function.prototype.apply.apply( @items.splice, [@items, [index, 0].concat(items)] )
+        @_updateRange()
+        @
+    
+
+    remove: ( item ) ->
+        index = @indexOf(item)
+        @_removeRange( index, index + 1 )
+        @
+    
+
+    removeAt: ( index ) ->
+        @_removeRange( index, index + 1 )
+        @
+    
+
+    removeRange: ( from, to ) ->
+        @_removeRange( from, to )
+        @
+    
+        
+    _removeRange: ( from, to ) ->
+        # http://ejohn.org/blog/javascript-array-remove/ (comments)
+        @items.splice( from, !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * @items.length) );
+        @_updateRange()
+    
+
+    _updateRange: ->
+        @count = @items.length
+    
+
+    set: ( index, value ) ->
+        try
+            @items[ index ] = value
+            return true
+        catch err
+            console.log( err )
+            return false
+    
+
+    get: ( index ) ->
+        @items[index]
+    
+
+
+
+
+
+
+
 
 
 

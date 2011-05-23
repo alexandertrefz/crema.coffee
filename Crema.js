@@ -24,14 +24,14 @@
    * THE SOFTWARE.
    *
    */  var crema;
-  var __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
+  var __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; }, __hasProp = Object.prototype.hasOwnProperty, __extends = function(child, parent) {
     for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; }
     function ctor() { this.constructor = child; }
     ctor.prototype = parent.prototype;
     child.prototype = new ctor;
     child.__super__ = parent.prototype;
     return child;
-  }, __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
+  };
   _.ducktype = function(obj, methods) {
     var method, _i, _len;
     if (!_.isArray(methods)) {
@@ -63,15 +63,45 @@
     controllers: {},
     viewControllers: {}
   };
+  window.crema = crema;
   crema.EventMachine = (function() {
-    function EventMachine() {}
+    function EventMachine() {
+      this._registeredObjects = new crema.Collection();
+    }
     EventMachine.prototype.fireEvent = function(event, data) {
+      var clonedEvent, eventType, i, item, sendClone, _i, _len, _len2, _ref, _ref2;
       if (typeof event !== "object") {
         event = jQuery.Event(event);
       }
       jQuery.event.trigger(event, data, this);
       if ((this.parent != null) && !event.isPropagationStopped()) {
         jQuery.event.trigger(event, data, this.parent);
+      }
+      if (this._registeredObjects.count) {
+        _ref = this._registeredObjects.items;
+        for (i = 0, _len = _ref.length; i < _len; i++) {
+          item = _ref[i];
+          sendClone = false;
+          clonedEvent = _.clone(event);
+          clonedEvent.isRegisteredEvent = true;
+          clonedEvent.isClonedEvent = true;
+          clonedEvent.type += "." + item.namespace;
+          if (item.events.length === 0) {
+            sendClone = true;
+          } else {
+            _ref2 = item.events;
+            for (_i = 0, _len2 = _ref2.length; _i < _len2; _i++) {
+              eventType = _ref2[_i];
+              if (eventType === clonedEvent.type) {
+                sendClone = true;
+                break;
+              }
+            }
+          }
+          if (sendClone) {
+            jQuery.event.trigger(clonedEvent, data, item.object);
+          }
+        }
       }
       return this;
     };
@@ -115,6 +145,34 @@
         jQuery.event.remove(this, type, fn);
       }
       return this;
+    };
+    EventMachine.prototype.register = function(namespace, events, object) {
+      if (!this._registeredObjects.contains(object)) {
+        this._registeredObjects.add({
+          namespace: namespace,
+          events: events,
+          object: object
+        });
+        return true;
+      }
+      return false;
+    };
+    EventMachine.prototype.unregister = function(object) {
+      var i, item, _len, _ref;
+      _ref = this._registeredObjects.items;
+      for (i = 0, _len = _ref.length; i < _len; i++) {
+        item = _ref[i];
+        if (item.object === object) {
+          console.log(item);
+          console.log(i);
+          __bind(function(i) {
+            return this._registeredObjects.removeAt(i);
+          }, this)(i);
+          console.log("removed");
+          return true;
+        }
+      }
+      return false;
     };
     return EventMachine;
   })();
@@ -385,6 +443,9 @@
       this.items.indexOf(item);
       return this;
     };
+    Collection.prototype.contains = function(item) {
+      return !!!this.indexOf(item);
+    };
     Collection.prototype.add = function(item) {
       this.items.push(item);
       this._updateRange();
@@ -412,11 +473,11 @@
     Collection.prototype.remove = function(item) {
       var index;
       index = this.indexOf(item);
-      this._removeRange(index, index + 1);
+      this._removeAt(index);
       return this;
     };
     Collection.prototype.removeAt = function(index) {
-      this._removeRange(index, index + 1);
+      this._removeAt(index);
       return this;
     };
     Collection.prototype.removeRange = function(from, to) {
@@ -426,6 +487,9 @@
     Collection.prototype._removeRange = function(from, to) {
       this.items.splice(from, !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * this.items.length));
       return this._updateRange();
+    };
+    Collection.prototype._removeAt = function(index) {
+      return this._removeRange(index, index);
     };
     Collection.prototype._updateRange = function() {
       return this.count = this.items.length;
@@ -443,5 +507,12 @@
       return this.items[index];
     };
     return Collection;
+  })();
+  (function() {
+    var eventController;
+    eventController = new Crema.EventMachine();
+    Crema.publish = eventController.fireEvent;
+    Crema.subscribe = eventController.bindEvent;
+    return Crema.unsubscribe = eventController.unbindEvent;
   })();
 }).call(this);

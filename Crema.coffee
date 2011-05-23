@@ -487,12 +487,12 @@ class crema.Collection extends crema.EventMachine
 
     remove: ( item ) ->
         index = @indexOf(item)
-        @_removeRange( index, index + 1 )
+        @_removeAt( index )
         @
     
 
     removeAt: ( index ) ->
-        @_removeRange( index, index + 1 )
+        @_removeAt( index )
         @
     
 
@@ -506,6 +506,9 @@ class crema.Collection extends crema.EventMachine
         @items.splice( from, !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * @items.length) );
         @_updateRange()
     
+    
+    _removeAt: ( index ) ->
+        @_removeRange( index, index )
 
     _updateRange: ->
         @count = @items.length
@@ -523,7 +526,6 @@ class crema.Collection extends crema.EventMachine
     get: ( index ) ->
         @items[index]
     
-
 
 
 

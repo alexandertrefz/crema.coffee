@@ -527,13 +527,20 @@ class crema.Collection extends crema.EventMachine
 
 
 
+    
 
 
+# =============================
+# = Publish/Subscribe Pattern =
+# =============================
+( ->
+    eventController = new Crema.EventMachine()
+    
+    Crema.publish = eventController.fireEvent
+    Crema.subscribe = eventController.bindEvent
+    Crema.unsubscribe = eventController.unbindEvent
 
-
-
-
-
+)()
 
 
 

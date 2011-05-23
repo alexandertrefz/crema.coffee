@@ -460,6 +460,10 @@ class crema.Collection extends crema.EventMachine
         @
     
         
+    contains: ( item ) ->
+        !!!@indexOf( item )
+    
+        
     add: ( item ) ->
         @items.push( item )
         @_updateRange()

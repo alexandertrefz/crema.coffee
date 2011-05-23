@@ -153,11 +153,17 @@ crema = {
     viewControllers: {}
 }
 
+# expose crema
+window.crema = crema
 
 # ======================
 # = EventMachine Class =
 # ======================
 class crema.EventMachine
+    constructor: () ->
+        @_registeredObjects = new crema.Collection()
+    
+    
     fireEvent: ( event, data ) ->
         event = jQuery.Event( event ) unless typeof event is "object"
         
@@ -165,6 +171,26 @@ class crema.EventMachine
         
         if @parent? and not event.isPropagationStopped()
             jQuery.event.trigger( event, data, @parent )
+            
+        if @_registeredObjects.count
+            for item, i in @_registeredObjects.items
+                
+                sendClone = false
+                clonedEvent = _.clone( event )
+                clonedEvent.isRegisteredEvent = true
+                clonedEvent.isClonedEvent = true
+                clonedEvent.type += "." + item.namespace
+                
+                if item.events.length is 0
+                    sendClone = true
+                else
+                    for eventType in item.events
+                        if eventType is clonedEvent.type
+                            sendClone = true
+                            break
+                
+                if sendClone
+                    jQuery.event.trigger( clonedEvent, data, item.object )
             
         return @
     
@@ -206,6 +232,26 @@ class crema.EventMachine
         return @
     
 
+    register: ( namespace, events, object ) ->
+        unless @_registeredObjects.contains( object )
+            @_registeredObjects.add( {namespace, events, object} )
+            return true
+        return false
+    
+    
+    unregister: ( object ) ->
+        for item, i in @_registeredObjects.items
+            if item.object is object
+                console.log(item)
+                console.log(i)
+                do (i) =>
+                    @_registeredObjects.removeAt( i )
+                
+                console.log("removed")
+                return true
+        return false
+    
+        
 
 # ================
 # = Module Class =
@@ -547,6 +593,7 @@ class crema.Collection extends crema.EventMachine
     Crema.unsubscribe = eventController.unbindEvent
 
 )()
+
 
 
 

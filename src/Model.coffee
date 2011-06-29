@@ -1,4 +1,4 @@
-class crema.Model extends Crema.EventMachine
+class crema.Model extends crema.EventMachine
     constructor: () ->
         
     

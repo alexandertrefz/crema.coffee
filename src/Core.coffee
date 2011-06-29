@@ -143,6 +143,10 @@ _.isView = ( obj ) ->
     return _.isModule( obj ) and _.ducktype( obj, ["update", "dispose"] )
 
 
+_.isModel = ( obj ) ->
+    return _.isModule( obj ) and _.ducktype( obj, ["getData"] )
+
+
 # ====================
 # = Initialize crema =
 # ====================
@@ -151,5 +155,6 @@ crema = {
     views: {}
     controllers: {}
     viewControllers: {}
+    models: {}
     types: {}
 }

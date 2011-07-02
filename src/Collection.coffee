@@ -1,5 +1,7 @@
 class crema.Collection extends crema.EventMachine
-    constructor: ( array = [] ) ->
+    constructor: ( array = [], cleanUpItems = false ) ->
+        
+        array = _.without(array, undefined) if cleanUpItems
         
         @count = array.length
         @items = array

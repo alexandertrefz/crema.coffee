@@ -55,10 +55,21 @@ class crema.Collection extends crema.EventMachine
         @_removeRange( from, to )
         @
     
-        
+    
+    _calculateSpliceIndex: ( from, to ) ->
+        !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * @items.length)
+    
+    
+    _calculateIndex: ( index ) ->
+        if index is 0
+            index
+        else
+            @_calculateSpliceIndex( 1, index )
+    
+    
     _removeRange: ( from, to ) ->
         # http://ejohn.org/blog/javascript-array-remove/ (comments)
-        @items.splice( from, !to || 1 + to - from + (!(to < 0 ^ from >= 0) && (to < 0 || -1) * @items.length) );
+        @items.splice( from, @_calculateSpliceIndex(from, to) );
         @_updateRange()
     
     
@@ -72,7 +83,10 @@ class crema.Collection extends crema.EventMachine
     
     set: ( index, value ) ->
         try
-            @items[ index ] = value
+            if index >= @count
+                throw new Error("Index is out of range.")
+                
+            @items[ @_calculateIndex( index ) ] = value
             return true
         catch err
             console.log( err )
@@ -80,5 +94,5 @@ class crema.Collection extends crema.EventMachine
     
 
     get: ( index ) ->
-        @items[index]
+        @items[ @_calculateIndex( index ) ]
     

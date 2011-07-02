@@ -15,43 +15,42 @@ class crema.Collection extends crema.EventMachine
         !!~@indexOf( item )
     
     
-        
     add: ( item ) ->
         @items.push( item )
         @_updateRange()
         @
     
-
+    
     addRange: ( items ) ->
         for item in items
             @items.push( item )
         @_updateRange()
         @
     
-
+    
     insert: ( item, index ) ->
         @items.splice( index, 0, item )
         @_updateRange()
         @
     
-
+    
     insertRange: ( items, index ) ->
-        Function.prototype.apply.apply( @items.splice, [@items, [index, 0].concat(items)] )
+        Array::splice.apply( @items, [index, 0].concat(items) )
         @_updateRange()
         @
     
-
+    
     remove: ( item ) ->
         index = @indexOf(item)
         @_removeAt( index )
         @
     
-
+    
     removeAt: ( index ) ->
         @_removeAt( index )
         @
     
-
+    
     removeRange: ( from, to ) ->
         @_removeRange( from, to )
         @
@@ -65,11 +64,12 @@ class crema.Collection extends crema.EventMachine
     
     _removeAt: ( index ) ->
         @_removeRange( index, index )
-
+    
+    
     _updateRange: ->
         @count = @items.length
     
-
+    
     set: ( index, value ) ->
         try
             @items[ index ] = value

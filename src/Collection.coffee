@@ -3,16 +3,17 @@ class crema.Collection extends crema.EventMachine
         
         array = _.without(array, undefined) if cleanUpItems
         
-        @count = array.length
         @items = array
+        @_updateRange()
     
-        
+    
     indexOf: ( item ) ->
         @items.indexOf( item )
     
-        
+    
     contains: ( item ) ->
-        !!!@indexOf( item )
+        !!~@indexOf( item )
+    
     
         
     add: ( item ) ->

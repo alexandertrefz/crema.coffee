@@ -16,7 +16,6 @@ option "-v", "--version [VERSION]", "Defines the Version."
 task "build", "Build everything", (options) ->
     invoke("build:source")
     invoke("build:tests")
-    console.log("Every build done.")
 
 
 task "build:source", "Build crema.js from source", (options) ->

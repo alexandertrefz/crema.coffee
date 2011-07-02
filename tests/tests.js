@@ -139,16 +139,14 @@ test("addRange", function() {
 });
 test("insert", function() {
   var arr, collection;
-  arr = [0, 2, 4];
+  arr = [0, 2, 5];
   collection = new $.Collection(arr);
-  collection.insert(-1, -1);
-  ok(collection.count === 4 && collection.items.length === 4 && containsGroup(collection, [-1, 0, 2, 4]));
   collection.insert(1, 1);
-  ok(collection.count === 5 && collection.items.length === 5 && containsGroup(collection, [-1, 0, 1, 2, 4]));
+  ok(collection.count === 4 && collection.items.length === 4 && containsGroup(collection, [0, 1, 2, 5]));
   collection.insert(3, 3);
-  ok(collection.count === 6 && collection.items.length === 6 && containsGroup(collection, [-1, 0, 1, 2, 3, 4]));
-  collection.insert(5, 5);
-  return ok(collection.count === 7 && collection.items.length === 7 && containsGroup(collection, [-1, 0, 1, 2, 3, 4, 5]));
+  ok(collection.count === 5 && collection.items.length === 5 && containsGroup(collection, [0, 1, 2, 3, 5]));
+  collection.insert(4, -1);
+  return ok(collection.count === 6 && collection.items.length === 6 && containsGroup(collection, [0, 1, 2, 3, 4, 5]));
 });
 test("insertRange", function() {
   var arr, collection, range;
@@ -161,7 +159,7 @@ test("insertRange", function() {
   collection.insertRange(range, 1);
   ok(collection.count === 6 && collection.items.length === 6 && containsGroup(collection, [0, 1, 2, 3, 4, 8]));
   range = [5, 6, 7];
-  collection.insertRange(range, 6);
+  collection.insertRange(range, -1);
   return ok(collection.count === 9 && collection.items.length === 9 && containsGroup(collection, [0, 1, 2, 3, 4, 5, 6, 7, 8]));
 });
 test("_calculateSpliceIndex", function() {

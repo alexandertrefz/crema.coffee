@@ -164,20 +164,17 @@ test "addRange", () ->
 
 test "insert", () ->
     
-    arr = [0, 2, 4]
+    arr = [0, 2, 5]
     collection = new $.Collection( arr )
     
-    collection.insert( -1, -1 )
-    ok( collection.count is 4 and collection.items.length is 4 and containsGroup(collection, [-1, 0, 2, 4]))
-    
     collection.insert( 1, 1 )
-    ok( collection.count is 5 and collection.items.length is 5 and containsGroup(collection, [-1, 0, 1, 2, 4]))
+    ok( collection.count is 4 and collection.items.length is 4 and containsGroup(collection, [0, 1, 2, 5]))
     
     collection.insert( 3, 3 )
-    ok( collection.count is 6 and collection.items.length is 6 and containsGroup(collection, [-1, 0, 1, 2, 3, 4]))
+    ok( collection.count is 5 and collection.items.length is 5 and containsGroup(collection, [0, 1, 2, 3, 5]))
     
-    collection.insert( 5, 5 )
-    ok( collection.count is 7 and collection.items.length is 7 and containsGroup(collection, [-1, 0, 1, 2, 3, 4, 5]))
+    collection.insert( 4, -1 )
+    ok( collection.count is 6 and collection.items.length is 6 and containsGroup(collection, [0, 1, 2, 3, 4, 5]))
 
 test "insertRange", () ->
     
@@ -193,7 +190,7 @@ test "insertRange", () ->
     ok( collection.count is 6 and collection.items.length is 6 and containsGroup(collection, [0, 1, 2, 3, 4, 8]))
     
     range = [5, 6, 7]
-    collection.insertRange( range, 6)
+    collection.insertRange( range, -1)
     ok( collection.count is 9 and collection.items.length is 9 and containsGroup(collection, [0, 1, 2, 3, 4, 5, 6, 7, 8]))
 
 test "_calculateSpliceIndex", () ->

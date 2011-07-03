@@ -33,7 +33,7 @@ class crema.EventMachine
             
         return @
     
-
+    
     bindEvent: ( type, data, fn, once = false ) ->
         # Handle object literals
         if typeof type is "object"
@@ -70,7 +70,7 @@ class crema.EventMachine
 
         return @
     
-
+    
     register: ( namespace, events, object ) ->
         unless @_registeredObjects.contains( object )
             @_registeredObjects.add( {namespace, events, object} )
@@ -90,4 +90,4 @@ class crema.EventMachine
                 return true
         return false
     
-        
+    

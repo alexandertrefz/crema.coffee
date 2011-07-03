@@ -91,8 +91,9 @@ class crema.Collection extends crema.EventMachine
         catch err
             console.log( err )
             return false
+        
     
-
+    
     get: ( index ) ->
         @items[ @_calculateIndex( index ) ]
     

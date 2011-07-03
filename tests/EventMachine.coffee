@@ -1,0 +1,5 @@
+module "EventMachine"
+
+test "constructor", () ->
+    
+

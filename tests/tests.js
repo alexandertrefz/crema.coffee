@@ -1,31 +1,84 @@
-var $, containsGroup, notContainsGroup;
-$ = crema;
+var containsGroup, notContainsGroup;
+module("Base");
+test("_.ducktype", function() {
+  var x, y, z;
+  x = y = z = function() {};
+  ok(_.ducktype({
+    x: x,
+    y: y,
+    z: z
+  }, ["x", "y", "z"]));
+  ok(_.ducktype({
+    x: x,
+    y: y,
+    z: z
+  }, ["x", "y"]));
+  ok(!_.ducktype({
+    x: x,
+    y: y,
+    z: z
+  }, ["x", "y", "z", "a"]));
+  return ok(!_.ducktype({}, ["x", "y", "z", "a"]));
+});
+test("_.isEventMachine", function() {
+  var eventMachine;
+  eventMachine = new crema.EventMachine();
+  return ok(_.isEventMachine(eventMachine));
+});
+test("_.isModule", function() {
+  var module;
+  module = new crema.Module();
+  return ok(_.isModule(module));
+});
+test("_.isViewController", function() {
+  var viewController;
+  viewController = new crema.ViewController();
+  return ok(_.isViewController(viewController));
+});
+test("_.isView", function() {
+  var view;
+  view = new crema.View();
+  return ok(_.isView(view));
+});
+test("_.isModel", function() {
+  var model;
+  model = new crema.Model();
+  return ok(_.isModel(model));
+});
+test("Namespaces", function() {
+  ok(crema.version != null, "crema.version exists");
+  ok(crema.views != null, "crema.views exists");
+  ok(crema.controllers != null, "crema.controllers exists");
+  ok(crema.viewControllers != null, "crema.viewControllers exists");
+  ok(crema.models != null, "crema.models exists");
+  return ok(crema.types != null, "crema.types exists");
+});
+module("EventMachine");
+test("constructor", function() {});
+module("Collection");
 containsGroup = function(collection, group) {
-  var result, value, _i, _len;
-  result = true;
+  var value, _i, _len;
   for (_i = 0, _len = group.length; _i < _len; _i++) {
     value = group[_i];
     if (!collection.contains(value )) {
-      result = false;
+      return false;
     }
   }
-  return result;
+  return true;
 };
 notContainsGroup = function(collection, group) {
-  var result, value, _i, _len;
-  result = true;
+  var value, _i, _len;
   for (_i = 0, _len = group.length; _i < _len; _i++) {
     value = group[_i];
     if (collection.contains(value )) {
-      result = false;
+      result(false);
     }
   }
-  return result;
+  return true;
 };
-module("Collection");
 test("_updateRange", function() {
   var arr, collection;
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equal(collection.count, 0);
   arr = [0, 1, 2];
   collection.items = arr;
@@ -42,46 +95,46 @@ test("_updateRange", function() {
 });
 test("constructor", function() {
   var arr, collection;
-  collection = new $.Collection();
+  collection = new crema.Collection();
   equals(collection.count, 0, "Collection without Arguments");
   arr = [];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equals(collection.count, 0, "Collection with []");
   arr = [0, 1, 2, 3];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equals(collection.count, 4, "Collection with [0, 1, 2, 3]");
   arr = [];
   arr[0] = 0;
   arr[3] = 3;
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equals(collection.count, 4, "Collection with [0, undefined, undefined, 3]");
   arr = [];
-  collection = new $.Collection(arr, true);
+  collection = new crema.Collection(arr, true);
   equals(collection.count, 0, "Collection with [], true");
   arr = [0, 1, 2, 3];
-  collection = new $.Collection(arr, true);
+  collection = new crema.Collection(arr, true);
   equals(collection.count, 4, "Collection with [0, 1, 2, 3], true");
   arr = [];
   arr[0] = 0;
   arr[3] = 3;
-  collection = new $.Collection(arr, true);
+  collection = new crema.Collection(arr, true);
   equals(collection.count, 2, "Collection with [0, undefined, undefined, 3], true");
   arr = [];
-  collection = new $.Collection(arr, false);
+  collection = new crema.Collection(arr, false);
   equals(collection.count, 0, "Collection with [], false");
   arr = [0, 1, 2, 3];
-  collection = new $.Collection(arr, false);
+  collection = new crema.Collection(arr, false);
   equals(collection.count, 4, "Collection with [0, 1, 2, 3], false");
   arr = [];
   arr[0] = 0;
   arr[3] = 3;
-  collection = new $.Collection(arr, false);
+  collection = new crema.Collection(arr, false);
   return equals(collection.count, 4, "Collection with [0, undefined, undefined, 3], false");
 });
 test("indexOf", function() {
   var arr, collection;
   arr = [0, 1, 2, 3];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equals(collection.indexOf(0), 0, "indexOf 0 in [0, 1, 2, 3]");
   equals(collection.indexOf(1), 1, "indexOf 1 in [0, 1, 2, 3]");
   equals(collection.indexOf(2), 2, "indexOf 2 in [0, 1, 2, 3]");
@@ -89,7 +142,7 @@ test("indexOf", function() {
   arr = [];
   arr[0] = 0;
   arr[3] = 3;
-  collection = new $.Collection(arr, true);
+  collection = new crema.Collection(arr, true);
   equals(collection.indexOf(0), 0, "indexOf 0 in [0, undefined, undefined, 3], true");
   equals(collection.indexOf(1), -1, "indexOf 1 in [0, undefined, undefined, 3], true");
   equals(collection.indexOf(2), -1, "indexOf 2 in [0, undefined, undefined, 3], true");
@@ -98,7 +151,7 @@ test("indexOf", function() {
 test("contains", function() {
   var arr, collection;
   arr = [0, 1, 2, 3];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equals(collection.contains(0), true, "contains 0 in [0, 1, 2, 3]");
   equals(collection.contains(1), true, "contains 1 in [0, 1, 2, 3]");
   equals(collection.contains(2), true, "contains 2 in [0, 1, 2, 3]");
@@ -106,7 +159,7 @@ test("contains", function() {
   arr = [];
   arr[0] = 0;
   arr[3] = 3;
-  collection = new $.Collection(arr, true);
+  collection = new crema.Collection(arr, true);
   equals(collection.contains(0), true, "contains 0 in [0, undefined, undefined, 3], true");
   equals(collection.contains(1), false, "contains 1 in [0, undefined, undefined, 3], true");
   equals(collection.contains(2), false, "contains 2 in [0, undefined, undefined, 3], true");
@@ -115,7 +168,7 @@ test("contains", function() {
 test("add", function() {
   var arr, collection;
   arr = [];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection.add(0);
   ok(collection.count === 1 && collection.items.length === 1 && collection.contains(0));
   collection.add(1);
@@ -126,7 +179,7 @@ test("add", function() {
 test("addRange", function() {
   var arr, collection, range;
   arr = [];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   range = [0, 1, 2];
   collection.addRange(range);
   ok(collection.count === 3 && collection.items.length === 3 && containsGroup(collection, [0, 1, 2]));
@@ -140,7 +193,7 @@ test("addRange", function() {
 test("insert", function() {
   var arr, collection;
   arr = [0, 2, 5];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection.insert(1, 1);
   ok(collection.count === 4 && collection.items.length === 4 && containsGroup(collection, [0, 1, 2, 5]));
   collection.insert(3, 3);
@@ -151,7 +204,7 @@ test("insert", function() {
 test("insertRange", function() {
   var arr, collection, range;
   arr = [];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   range = [0, 4, 8];
   collection.insertRange(range, 0);
   ok(collection.count === 3 && collection.items.length === 3 && containsGroup(collection, [0, 4, 8]));
@@ -166,7 +219,7 @@ test("_calculateSpliceIndex", function() {
   var arr, collection, startIndex;
   startIndex = 1;
   arr = [0, 1, 2, 3, 4];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equal(collection._calculateSpliceIndex(startIndex, 4), 4);
   equal(collection._calculateSpliceIndex(startIndex, 3), 3);
   equal(collection._calculateSpliceIndex(startIndex, 2), 2);
@@ -181,7 +234,7 @@ test("_calculateSpliceIndex", function() {
 test("_calculateIndex", function() {
   var arr, collection;
   arr = [0, 1, 2, 3, 4];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equal(collection._calculateIndex(4), 4);
   equal(collection._calculateIndex(3), 3);
   equal(collection._calculateIndex(2), 2);
@@ -196,7 +249,7 @@ test("_calculateIndex", function() {
 test("_removeRange", function() {
   var arr, collection;
   arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection._removeRange(3, 5);
   ok(collection.count === 6 && collection.items.length === 6 && containsGroup(collection, [0, 1, 2, 6, 7, 8]) && notContainsGroup(collection, [3, 4, 5]));
   collection._removeRange(3, 5);
@@ -207,7 +260,7 @@ test("_removeRange", function() {
 test("_removeAt", function() {
   var arr, collection;
   arr = [0, 1, 2];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection._removeAt(1);
   ok(collection.count === 2 && collection.items.length === 2 && !collection.contains(1) && containsGroup(collection, [0, 2]));
   collection._removeAt(1);
@@ -218,7 +271,7 @@ test("_removeAt", function() {
 test("removeAt", function() {
   var arr, collection;
   arr = [0, 1, 2];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection.removeAt(1);
   ok(collection.count === 2 && collection.items.length === 2 && !collection.contains(1) && containsGroup(collection, [0, 2]));
   collection.removeAt(1);
@@ -229,7 +282,7 @@ test("removeAt", function() {
 test("removeRange", function() {
   var arr, collection;
   arr = [0, 1, 2, 3, 4, 5, 6, 7, 8];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection.removeRange(3, 5);
   ok(collection.count === 6 && collection.items.length === 6 && containsGroup(collection, [0, 1, 2, 6, 7, 8]) && notContainsGroup(collection, [3, 4, 5]));
   collection.removeRange(3, 5);
@@ -240,7 +293,7 @@ test("removeRange", function() {
 test("remove", function() {
   var arr, collection;
   arr = [0, 1, 2];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   collection.remove(0);
   ok(collection.count === 2 && collection.items.length === 2 && !collection.contains(0) && containsGroup(collection, [1, 2]));
   collection.remove(1);
@@ -251,7 +304,7 @@ test("remove", function() {
 test("get", function() {
   var arr, collection;
   arr = [0, 1, 2, 3, 4];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equal(collection.get(4), 4);
   equal(collection.get(3), 3);
   equal(collection.get(2), 2);
@@ -266,7 +319,7 @@ test("get", function() {
 test("set", function() {
   var arr, collection;
   arr = [0, 1, 2, 3, 4];
-  collection = new $.Collection(arr);
+  collection = new crema.Collection(arr);
   equal(collection.set(4, 8), true);
   equal(collection.get(4), 8);
   equal(collection.set(3, 6), true);

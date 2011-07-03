@@ -128,23 +128,23 @@ _.ducktype = ( obj, methods ) ->
 
 # Shortcuts or often used type Checks
 _.isEventMachine = ( obj ) ->
-    return _.ducktype( obj, ["fireEvent", "bindEvent", "unbindEvent"] )
+    _.ducktype( obj, ["fireEvent", "bindEvent", "unbindEvent"] )
 
 
 _.isModule = ( obj ) ->
-    return _.isEventMachine( obj ) and _.ducktype( obj, ["add", "remove"] )
+    _.isEventMachine( obj ) and _.ducktype( obj, ["add", "remove"] )
 
 
 _.isViewController = ( obj ) ->
-    return _.isModule( obj ) and _.ducktype( obj, ["bindCommand", "unbindCommand", "sendCommand", "updateUI"] )
+    _.isModule( obj ) and _.ducktype( obj, ["bindCommand", "unbindCommand", "sendCommand", "updateUI"] )
 
 
 _.isView = ( obj ) ->
-    return _.isModule( obj ) and _.ducktype( obj, ["update", "dispose"] )
+    _.isModule( obj ) and _.ducktype( obj, ["update", "dispose"] )
 
 
 _.isModel = ( obj ) ->
-    return _.isModule( obj ) and _.ducktype( obj, ["getData"] )
+    _.isEventMachine( obj ) and _.ducktype( obj, ["getData"] )
 
 
 # ====================

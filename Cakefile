@@ -68,6 +68,8 @@ task "build:tests", "Build tests.js for crema.js", (options) ->
         fs.readFile "tests/#{file}.coffee", 'utf8', (err, fileContents) ->
             throw err if err
             
+            fileContents = "module \"#{file}\"\n\n#{fileContents}"
+            
             appContents[index] = fileContents
             readFileCount++
             

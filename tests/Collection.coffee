@@ -1,5 +1,3 @@
-module "Collection"
-
 containsGroup = ( collection, group ) ->
     for value in group
         return false unless collection.contains( value )

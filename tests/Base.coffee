@@ -1,5 +1,3 @@
-module "Base"
-
 test "_.ducktype", () ->
     x = y = z = () ->
         

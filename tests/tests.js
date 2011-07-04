@@ -343,3 +343,7 @@ test("set", function() {
   raises(collection.get(-6), "Index -6 is out of Range.");
   return raises(collection.get(6), "Index 6 is out of Range.");
 });
+module("Module");
+module("Model");
+module("View");
+module("ViewController");

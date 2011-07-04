@@ -1,5 +1,3 @@
-module "EventMachine"
-
 test "constructor", () ->
     
 

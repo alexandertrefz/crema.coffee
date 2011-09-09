@@ -6,7 +6,7 @@ containsGroup = ( collection, group ) ->
 
 notContainsGroup = ( collection, group ) ->
     for value in group
-        result false if collection.contains( value )
+        return false if collection.contains( value )
     
     return true
 

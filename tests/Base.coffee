@@ -1,46 +1,52 @@
 test "_.ducktype", () ->
-    x = y = z = () ->
+    x = y = z = ->
         
     
-    ok( _.ducktype( { x, y, z }, ["x", "y", "z"] ) )
-    ok( _.ducktype( { x, y, z }, ["x", "y"] ) )
-    ok( not _.ducktype( { x, y, z }, ["x", "y", "z", "a"] ) )
-    ok( not _.ducktype( {}, ["x", "y", "z", "a"] ) )
+    ok _.ducktype { x, y, z }, ["x", "y", "z"]
+    ok _.ducktype { x, y, z }, ["x", "y"]
+    ok not _.ducktype { x, y, z }, ["x", "y", "z", "a"]
+    ok not _.ducktype {}, ["x", "y", "z", "a"]
 
-test "_.isEventMachine", () ->
+
+test "_.isEventMachine",  ->
     eventMachine = new crema.EventMachine()
     
-    ok( _.isEventMachine( eventMachine ) )
+    ok _.isEventMachine eventMachine
 
-test "_.isModule", () ->
+
+test "_.isModule", ->
     
     module = new crema.Module()
     
-    ok( _.isModule( module ) )
+    ok _.isModule module
 
-test "_.isViewController", () ->
+
+test "_.isViewController", ->
     
     viewController = new crema.ViewController()
     
-    ok( _.isViewController( viewController ) )    
+    ok _.isViewController viewController
 
-test "_.isView", () ->
+
+test "_.isView", ->
     
     view = new crema.View()
     
-    ok( _.isView( view ) )  
+    ok _.isView view
+
 
 test "_.isModel", () ->
     
     model = new crema.Model()
     
-    ok( _.isModel( model ) )  
+    ok _.isModel model
 
-test "Namespaces", () ->
-    ok( crema.version?, "crema.version exists" )
-    ok( crema.views?, "crema.views exists" )
-    ok( crema.controllers?, "crema.controllers exists" )
-    ok( crema.viewControllers?, "crema.viewControllers exists" )
-    ok( crema.models?, "crema.models exists" )
-    ok( crema.types?, "crema.types exists" )
+
+test "Namespaces", ->
+    ok crema.version?, "crema.version exists"
+    ok crema.views?, "crema.views exists"
+    ok crema.controllers?, "crema.controllers exists"
+    ok crema.viewControllers?, "crema.viewControllers exists"
+    ok crema.models?, "crema.models exists"
+    ok crema.types?, "crema.types exists"
 

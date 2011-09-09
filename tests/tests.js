@@ -54,13 +54,12 @@ test("Namespaces", function() {
   return ok(crema.types != null, "crema.types exists");
 });
 module("EventMachine");
-test("constructor", function() {});
 module("Collection");
 containsGroup = function(collection, group) {
   var value, _i, _len;
   for (_i = 0, _len = group.length; _i < _len; _i++) {
     value = group[_i];
-    if (!collection.contains(value )) {
+    if (!collection.contains(value)) {
       return false;
     }
   }
@@ -70,8 +69,8 @@ notContainsGroup = function(collection, group) {
   var value, _i, _len;
   for (_i = 0, _len = group.length; _i < _len; _i++) {
     value = group[_i];
-    if (collection.contains(value )) {
-      result(false);
+    if (collection.contains(value)) {
+      return false;
     }
   }
   return true;
